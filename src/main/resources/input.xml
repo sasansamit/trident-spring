@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+    <!-- Spout -->
+    <bean id="fixedSpout" class="storm.trident.testing.FixedBatchSpout"
+        p:cycle="true">
+        <constructor-arg>
+            <bean class="backtype.storm.tuple.Fields">
+                <constructor-arg>
+                    <util:list>
+                        <value>sentence</value>
+                    </util:list>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+        <constructor-arg value="3" />
+        <constructor-arg>
+            <util:list>
+                <bean class="backtype.storm.tuple.Values" c:vals="the cow jumped over the moon"></bean>
+                <bean class="backtype.storm.tuple.Values"
+                    c:vals="the man went to the store and bought some candy"></bean>
+                <bean class="backtype.storm.tuple.Values" c:vals="four score and seven years ago"></bean>
+                <bean class="backtype.storm.tuple.Values" c:vals="how many apples can you eat"></bean>
+            </util:list>
+        </constructor-arg>
+    </bean>
+
+    <!-- Trident Config -->
+    <bean id="config" class="backtype.storm.Config" p:debug="true" />
+
+    <!-- Topology -->
+    <bean id="topology" class="storm.trident.TridentTopology" />
+
+    <!-- Streams -->
+    <bean id="stream1" class="com.kaseya.trident.StreamFactory"
+        c:spout-ref="fixedSpout" p:spoutNodeName="spout1"
+        c:topology-ref="topology" p:operations-ref="operations1" />
+
+    <util:list id="operations1">
+        <bean class="com.kaseya.trident.operations.EachOperation">
+            <constructor-arg index="0">
+                <bean class="backtype.storm.tuple.Fields" c:fields="sentence" />
+            </constructor-arg>
+            <constructor-arg index="1">
+                <bean class="storm.trident.testing.Split" />
+            </constructor-arg>
+            <constructor-arg index="2">
+                <bean class="backtype.storm.tuple.Fields" c:fields="word" />
+            </constructor-arg>
+        </bean>
+        <bean class="com.kaseya.trident.operations.GroupByOperation">
+            <constructor-arg>
+                <bean class="backtype.storm.tuple.Fields" c:fields="word" />
+            </constructor-arg>
+        </bean>
+        <bean class="com.kaseya.trident.operations.AggregateOperation">
+            <constructor-arg index="0">
+                <bean class="backtype.storm.tuple.Fields" c:fields="word" />
+            </constructor-arg>
+            <constructor-arg index="1">
+                <bean class="storm.trident.operation.builtin.Count" />
+            </constructor-arg>
+            <constructor-arg index="2">
+                <bean class="backtype.storm.tuple.Fields" c:fields="count" />
+            </constructor-arg>
+        </bean>
+    </util:list>
+
+    <util:list id="streams">
+        <ref bean="stream1" />
+    </util:list>
+
+    <bean id="wordCountTopologySubmission" class="com.kaseya.trident.SingleTopologySubmission"
+        c:topologyId="topology" c:topology-ref="topology" c:config-ref="config"
+        p:streams-ref="streams" />
+
+</beans>
