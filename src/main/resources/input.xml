@@ -35,10 +35,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         c:topologyId="topology" c:topology-ref="topology" c:config-ref="config"
         p:streams-ref="streams" />
 
-    <util:list id="streams">
-        <ref bean="stream1" />
-    </util:list>
-
     <!-- Trident Config -->
     <bean id="config" class="backtype.storm.Config" p:debug="true" />
 
@@ -46,10 +42,15 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="topology" class="storm.trident.TridentTopology" />
 
     <!-- Streams -->
+    <util:list id="streams">
+        <ref bean="stream1" />
+    </util:list>
+
     <bean id="stream1" class="com.kaseya.trident.StreamFactory"
         c:spout-ref="fixedSpout" p:spoutNodeName="spout1"
         c:topology-ref="topology" p:operations-ref="operations1" />
 
+    <!-- Object Store -->
     <util:list id="operations1">
         <bean class="com.kaseya.trident.operations.EachOperation"
             c:inputTuples="sentence" c:function-ref="splitFunction"
@@ -63,5 +64,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <bean id="splitFunction" class="storm.trident.testing.Split" />
     <bean id="countAggregator" class="storm.trident.operation.builtin.Count" />
+
+
 
 </beans>
