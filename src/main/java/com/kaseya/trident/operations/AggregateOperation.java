@@ -1,21 +1,27 @@
 package com.kaseya.trident.operations;
 
+import java.util.List;
+
 import storm.trident.fluent.GroupedStream;
 import storm.trident.operation.CombinerAggregator;
 import backtype.storm.tuple.Fields;
+
+import com.kaseya.trident.Utils;
 
 public class AggregateOperation implements IOperation {
 
     protected final Fields _input;
     protected final CombinerAggregator<?> _aggregator;
     protected final Fields _output;
-    
-    public AggregateOperation(final Fields input, final CombinerAggregator<?> aggregator, final Fields output) {
-        this._input = input;
+
+    public AggregateOperation(final List<String> inputTuples,
+                              final CombinerAggregator<?> aggregator,
+                              final List<String> outputTuples) {
+        this._input = new Fields(inputTuples);
         this._aggregator = aggregator;
-        this._output = output;
+        this._output = new Fields(outputTuples);
     }
-    
+
     public Fields getInput() {
         return _input;
     }
@@ -29,9 +35,9 @@ public class AggregateOperation implements IOperation {
     }
 
     public Object visit(Object stream) {
-        if (!(stream instanceof GroupedStream)) {
-            throw new RuntimeException("AggregateOperation can only be called on a GroupedStream. Current stream is of type [" + stream.getClass() + "]");
-        }
+
+        Utils.ValidateOperationType(this, stream, GroupedStream.class);
+
         GroupedStream castStream = (GroupedStream) stream;
         return castStream.aggregate(_input, _aggregator, _output);
     }

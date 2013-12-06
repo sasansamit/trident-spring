@@ -30,6 +30,15 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         </constructor-arg>
     </bean>
 
+    <!-- Topology Submission -->
+    <bean id="wordCountTopologySubmission" class="com.kaseya.trident.SingleTopologySubmission"
+        c:topologyId="topology" c:topology-ref="topology" c:config-ref="config"
+        p:streams-ref="streams" />
+
+    <util:list id="streams">
+        <ref bean="stream1" />
+    </util:list>
+
     <!-- Trident Config -->
     <bean id="config" class="backtype.storm.Config" p:debug="true" />
 
@@ -42,41 +51,17 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         c:topology-ref="topology" p:operations-ref="operations1" />
 
     <util:list id="operations1">
-        <bean class="com.kaseya.trident.operations.EachOperation">
-            <constructor-arg index="0">
-                <bean class="backtype.storm.tuple.Fields" c:fields="sentence" />
-            </constructor-arg>
-            <constructor-arg index="1">
-                <bean class="storm.trident.testing.Split" />
-            </constructor-arg>
-            <constructor-arg index="2">
-                <bean class="backtype.storm.tuple.Fields" c:fields="word" />
-            </constructor-arg>
-        </bean>
-        <bean class="com.kaseya.trident.operations.GroupByOperation">
-            <constructor-arg>
-                <bean class="backtype.storm.tuple.Fields" c:fields="word" />
-            </constructor-arg>
-        </bean>
-        <bean class="com.kaseya.trident.operations.AggregateOperation">
-            <constructor-arg index="0">
-                <bean class="backtype.storm.tuple.Fields" c:fields="word" />
-            </constructor-arg>
-            <constructor-arg index="1">
-                <bean class="storm.trident.operation.builtin.Count" />
-            </constructor-arg>
-            <constructor-arg index="2">
-                <bean class="backtype.storm.tuple.Fields" c:fields="count" />
-            </constructor-arg>
-        </bean>
+        <bean class="com.kaseya.trident.operations.EachOperation"
+            c:inputTuples="sentence" c:function-ref="splitFunction"
+            c:outputTuples="word" />
+        <bean class="com.kaseya.trident.operations.GroupByOperation"
+            c:groupBy="word" />
+        <bean class="com.kaseya.trident.operations.AggregateOperation"
+            c:inputTuples="word" c:aggregator-ref="countAggregator"
+            c:outputTuples="count" />
     </util:list>
 
-    <util:list id="streams">
-        <ref bean="stream1" />
-    </util:list>
-
-    <bean id="wordCountTopologySubmission" class="com.kaseya.trident.SingleTopologySubmission"
-        c:topologyId="topology" c:topology-ref="topology" c:config-ref="config"
-        p:streams-ref="streams" />
+    <bean id="splitFunction" class="storm.trident.testing.Split" />
+    <bean id="countAggregator" class="storm.trident.operation.builtin.Count" />
 
 </beans>

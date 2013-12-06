@@ -1,22 +1,25 @@
 package com.kaseya.trident.operations;
 
+import java.util.List;
+
 import storm.trident.Stream;
-import storm.trident.fluent.IAggregatableStream;
 import backtype.storm.tuple.Fields;
+
+import com.kaseya.trident.Utils;
 
 public class GroupByOperation implements IOperation {
 
     protected final Fields _groupBy;
 
-    public GroupByOperation(final Fields groupBy) {
-        this._groupBy = groupBy;
+    public GroupByOperation(final List<String> groupBy) {
+        this._groupBy = new Fields(groupBy);
     }
 
     public Object visit(Object stream) {
-        if (!(stream instanceof Stream)) {
-            throw new RuntimeException("GroupByOperation can only be called on a Stream. Current stream is of type [" + stream.getClass());
-        }
-        Stream castStream = (Stream)stream;
+
+        Utils.ValidateOperationType(this, stream, Stream.class);
+
+        Stream castStream = (Stream) stream;
         return castStream.groupBy(_groupBy);
     }
 }

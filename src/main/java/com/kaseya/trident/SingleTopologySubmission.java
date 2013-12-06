@@ -2,10 +2,9 @@ package com.kaseya.trident;
 
 import java.util.List;
 
-import backtype.storm.Config;
-import storm.trident.Stream;
 import storm.trident.TridentTopology;
 import storm.trident.fluent.IAggregatableStream;
+import backtype.storm.Config;
 
 public class SingleTopologySubmission {
 

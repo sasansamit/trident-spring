@@ -4,9 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.FactoryBean;
 
-import storm.trident.Stream;
 import storm.trident.TridentTopology;
-import storm.trident.fluent.IAggregatableStream;
 import storm.trident.spout.IBatchSpout;
 
 import com.kaseya.trident.operations.IOperation;
