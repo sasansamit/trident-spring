@@ -2,9 +2,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd 
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+    <context:annotation-config />
 
     <!-- Spout -->
     <bean id="fixedSpout" class="storm.trident.testing.FixedBatchSpout"
@@ -43,12 +47,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <!-- Streams -->
     <util:list id="streams">
-        <ref bean="stream1" />
+        <bean id="stream1" class="com.kaseya.trident.StreamWrapper"
+            p:spoutNodeName="spout1" p:topology-ref="topology"
+            p:operations-ref="operation2" p:batchSpout-ref="fixedSpout" />
     </util:list>
-
-    <bean id="stream1" class="com.kaseya.trident.StreamFactory"
-        c:spout-ref="fixedSpout" p:spoutNodeName="spout1"
-        c:topology-ref="topology" p:operations-ref="operations1" />
 
     <!-- Object Store -->
     <util:list id="operations1">
@@ -62,9 +64,20 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             c:outputTuples="count" />
     </util:list>
 
+    <util:list id="operation2">
+        <bean class="com.kaseya.trident.operations.EachOperation"
+            c:inputTuples="sentence" c:function-ref="splitFunction"
+            c:outputTuples="word" />
+        <bean class="com.kaseya.trident.operations.EachOperation"
+            c:inputTuples="word" c:filter-ref="filterFunciton" />
+        <bean class="com.kaseya.trident.operations.GroupByOperation"
+            c:groupBy="word" />
+        <bean class="com.kaseya.trident.operations.AggregateOperation"
+            c:inputTuples="word" c:aggregator-ref="countAggregator"
+            c:outputTuples="count" />
+    </util:list>
+
     <bean id="splitFunction" class="storm.trident.testing.Split" />
+    <bean id="filterFunciton" class="com.kaseya.trident.test.MyFilter" />
     <bean id="countAggregator" class="storm.trident.operation.builtin.Count" />
-
-
-
 </beans>

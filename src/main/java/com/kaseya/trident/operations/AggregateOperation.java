@@ -34,7 +34,7 @@ public class AggregateOperation implements IOperation {
         return _output;
     }
 
-    public Object visit(Object stream) {
+    public Object addStreamProcessor(Object stream) {
 
         Utils.ValidateOperationType(this, stream, GroupedStream.class);
 

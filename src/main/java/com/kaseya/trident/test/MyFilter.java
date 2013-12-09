@@ -1,0 +1,12 @@
+package com.kaseya.trident.test;
+
+import storm.trident.operation.BaseFilter;
+import storm.trident.tuple.TridentTuple;
+
+public class MyFilter extends BaseFilter {
+
+    public boolean isKeep(TridentTuple tuple) {
+        return tuple.getString(0).equalsIgnoreCase("the");
+    }
+
+}

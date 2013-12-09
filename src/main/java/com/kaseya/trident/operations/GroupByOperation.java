@@ -15,7 +15,7 @@ public class GroupByOperation implements IOperation {
         this._groupBy = new Fields(groupBy);
     }
 
-    public Object visit(Object stream) {
+    public Object addStreamProcessor(Object stream) {
 
         Utils.ValidateOperationType(this, stream, Stream.class);
 

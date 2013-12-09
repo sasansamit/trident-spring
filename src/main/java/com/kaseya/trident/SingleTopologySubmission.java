@@ -3,15 +3,15 @@ package com.kaseya.trident;
 import java.util.List;
 
 import storm.trident.TridentTopology;
-import storm.trident.fluent.IAggregatableStream;
 import backtype.storm.Config;
+import backtype.storm.generated.StormTopology;
 
-public class SingleTopologySubmission {
+public class SingleTopologySubmission implements ITopologySubmission {
 
     protected final String _topologyId;
     protected final TridentTopology _topology;
     protected final Config _config;
-    protected List<IAggregatableStream> _streams;
+    protected List<StreamWrapper> _streams;
 
     public SingleTopologySubmission(final String topologyId,
                                     final TridentTopology topology,
@@ -21,24 +21,33 @@ public class SingleTopologySubmission {
         this._config = config;
     }
 
+    /* (non-Javadoc)
+     * @see com.kaseya.trident.ITopologySubmission#submit()
+     */
+    public void submit() {
+        for (StreamWrapper builder : _streams) {
+            builder.build();
+        }
+    }
+
     // Getters & Setter
     public String getTopologyId() {
         return _topologyId;
     }
 
-    public TridentTopology getTopology() {
-        return _topology;
+    public StormTopology getTopology() {
+        return _topology.build();
     }
 
     public Config getConfig() {
         return _config;
     }
 
-    public List<IAggregatableStream> getStreams() {
+    public List<StreamWrapper> getStreams() {
         return _streams;
     }
 
-    public void setStreams(List<IAggregatableStream> streams) {
+    public void setStreams(List<StreamWrapper> streams) {
         this._streams = streams;
     }
 }

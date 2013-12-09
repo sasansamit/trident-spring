@@ -19,13 +19,15 @@ public final class TopologySubmitter {
 
         ApplicationContext appContext = new ClassPathXmlApplicationContext(args[0]);
 
-        SingleTopologySubmission submission = (SingleTopologySubmission) appContext
+        ITopologySubmission submission = (ITopologySubmission) appContext
                 .getBean("wordCountTopologySubmission");
+
+        submission.submit();
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology(submission.getTopologyId(),
                                submission.getConfig(),
-                               submission.getTopology().build());
+                               submission.getTopology());
 
         Utils.sleep(10000);
         cluster.killTopology(submission.getTopologyId());
