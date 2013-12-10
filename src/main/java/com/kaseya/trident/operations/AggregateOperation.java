@@ -22,18 +22,6 @@ public class AggregateOperation implements IStreamOperation {
         this._output = new Fields(outputTuples);
     }
 
-    public Fields getInput() {
-        return _input;
-    }
-
-    public CombinerAggregator<?> getAggregator() {
-        return _aggregator;
-    }
-
-    public Fields getOutput() {
-        return _output;
-    }
-
     public Object addStreamProcessor(Object stream) {
 
         Utils.ValidateOperationType(this, stream, GroupedStream.class);
