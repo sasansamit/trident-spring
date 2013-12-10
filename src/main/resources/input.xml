@@ -4,10 +4,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd 
 http://www.springframework.org/schema/context
-http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     <context:annotation-config />
 
     <!-- Spout -->
@@ -39,20 +39,28 @@ http://www.springframework.org/schema/context/spring-context-2.5.xsd">
         c:topologyId="topology" c:topology-ref="topology" c:config-ref="config"
         p:streams-ref="streams" />
 
+    <!-- Streams -->
+    <util:list id="streams">
+        <ref bean="stream1" />
+        <ref bean="stream2" />
+    </util:list>
+
+    <!-- Object Store -->
+    <!-- Stream wrapper objects -->
+    <bean id="stream1" class="com.kaseya.trident.StreamWrapper"
+        c:spoutNodeName="spout1" c:topology-ref="topology"
+        c:operations-ref="operations2" c:spout-ref="fixedSpout" />
+    <bean id="stream2" class="com.kaseya.trident.StreamWrapper"
+        c:topology-ref="topology" c:operations-ref="operations3"
+        c:stream="#{stream1.stream}" />
+
     <!-- Trident Config -->
     <bean id="config" class="backtype.storm.Config" p:debug="true" />
 
     <!-- Topology -->
     <bean id="topology" class="storm.trident.TridentTopology" />
 
-    <!-- Streams -->
-    <util:list id="streams">
-        <bean id="stream1" class="com.kaseya.trident.StreamWrapper"
-            p:spoutNodeName="spout1" p:topology-ref="topology"
-            p:operations-ref="operation2" p:batchSpout-ref="fixedSpout" />
-    </util:list>
-
-    <!-- Object Store -->
+    <!-- Stream Operations -->
     <util:list id="operations1">
         <bean class="com.kaseya.trident.operations.EachOperation"
             c:inputTuples="sentence" c:function-ref="splitFunction"
@@ -64,12 +72,15 @@ http://www.springframework.org/schema/context/spring-context-2.5.xsd">
             c:outputTuples="count" />
     </util:list>
 
-    <util:list id="operation2">
+    <util:list id="operations2">
         <bean class="com.kaseya.trident.operations.EachOperation"
             c:inputTuples="sentence" c:function-ref="splitFunction"
             c:outputTuples="word" />
         <bean class="com.kaseya.trident.operations.EachOperation"
             c:inputTuples="word" c:filter-ref="filterFunciton" />
+    </util:list>
+
+    <util:list id="operations3">
         <bean class="com.kaseya.trident.operations.GroupByOperation"
             c:groupBy="word" />
         <bean class="com.kaseya.trident.operations.AggregateOperation"

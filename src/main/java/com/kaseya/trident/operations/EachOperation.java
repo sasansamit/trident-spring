@@ -9,7 +9,7 @@ import backtype.storm.tuple.Fields;
 
 import com.kaseya.trident.Utils;
 
-public class EachOperation implements IOperation {
+public class EachOperation implements IStreamOperation {
     protected final BaseEachHelper _eachHelper;
 
     public EachOperation(final List<String> inputTuples,

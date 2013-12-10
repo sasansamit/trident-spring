@@ -8,7 +8,7 @@ import backtype.storm.tuple.Fields;
 
 import com.kaseya.trident.Utils;
 
-public class AggregateOperation implements IOperation {
+public class AggregateOperation implements IStreamOperation {
 
     protected final Fields _input;
     protected final CombinerAggregator<?> _aggregator;

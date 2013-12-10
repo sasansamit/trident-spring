@@ -22,8 +22,6 @@ public final class TopologySubmitter {
         ITopologySubmission submission = (ITopologySubmission) appContext
                 .getBean("wordCountTopologySubmission");
 
-        submission.submit();
-
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology(submission.getTopologyId(),
                                submission.getConfig(),

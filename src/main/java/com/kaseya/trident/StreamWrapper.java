@@ -2,177 +2,152 @@ package com.kaseya.trident;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Required;
-
 import storm.trident.Stream;
+import storm.trident.TridentState;
 import storm.trident.TridentTopology;
+import storm.trident.fluent.GroupedStream;
 import storm.trident.spout.IBatchSpout;
 import storm.trident.spout.IOpaquePartitionedTridentSpout;
 import storm.trident.spout.IPartitionedTridentSpout;
 import storm.trident.spout.ITridentSpout;
+import backtype.storm.tuple.Fields;
 
-import com.kaseya.trident.operations.IOperation;
+import com.kaseya.trident.operations.IStreamOperation;
 
 public class StreamWrapper {
-    protected String _spoutNodeName;
-    protected TridentTopology _topology;
-    protected List<IOperation> _operations;
-    protected IStreamFactory _streamFactory;
-    protected Stream _stream;
+    protected Object _stream;
 
-    @Required
-    public void setSpoutNodeName(String spoutNodeName) {
-        this._spoutNodeName = spoutNodeName;
+    /**
+     * Adds operations onto passed in stream.
+     * 
+     * @param stream
+     *            Passed in stream.
+     * @param spoutNodeName
+     *            Spout Name.
+     * @param topology
+     *            Trident topology.
+     * @param operations
+     *            Stream operations.
+     * 
+     * @see IStreamOperation
+     */
+    public StreamWrapper(final Stream stream,
+                         final TridentTopology topology,
+                         final List<IStreamOperation> operations) {
+
+        _stream = decorateStream_(stream, operations);
     }
 
-    @Required
-    public void setTopology(TridentTopology topology) {
-        this._topology = topology;
+    /**
+     * Creates a stream from a join of streams.<br>
+     * <b>Note -</b> Join would be an inner join.
+     * 
+     * @param streams
+     *            List of streams to join.
+     * @param joinFields
+     *            Fields to join streams on.
+     * @param outFields
+     *            Fields in output stream.
+     * @param spoutNodeName
+     *            Spout name.
+     * @param topology
+     *            Trident topology.
+     * @param operations
+     *            Stream operations.
+     * 
+     * @see IStreamOperation
+     */
+    public StreamWrapper(final List<Stream> streams,
+                         final List<Fields> joinFields,
+                         final Fields outFields,
+                         final TridentTopology topology,
+                         final List<IStreamOperation> operations) {
+
+        _stream = decorateStream_(topology.join(streams, joinFields, outFields),
+                                  operations);
     }
 
-    @Required
-    public void setOperations(List<IOperation> operations) {
-        this._operations = operations;
+    /**
+     * Creates a stream from a merge of streams.
+     * 
+     * @param outputFields
+     *            - Fields in output stream.
+     * @param streams
+     *            - List of streams to merge.
+     * @param spoutNodeName
+     *            - Spout name.
+     * @param topology
+     * @param operations
+     */
+    public StreamWrapper(final Fields outputFields, final List<Stream> streams,
+                         final TridentTopology topology,
+                         final List<IStreamOperation> operations) {
+
+        _stream = decorateStream_(topology.merge(outputFields, streams),
+                                  operations);
     }
 
-    public void setBatchSpout(final IBatchSpout spout) {
-        _streamFactory = new BatchSpoutFactory(spout);
+    public StreamWrapper(final IBatchSpout spout, final String spoutNodeName,
+                         final TridentTopology topology,
+                         final List<IStreamOperation> operations) {
+        _stream = decorateStream_(topology.newStream(spoutNodeName, spout),
+                                  operations);
     }
 
-    public void setTridentSpout(final ITridentSpout<?> spout) {
-        _streamFactory = new TridentSpoutFactory(spout);
+    public StreamWrapper(final ITridentSpout<?> spout,
+                         final String spoutNodeName,
+                         final TridentTopology topology,
+                         final List<IStreamOperation> operations) {
+        _stream = decorateStream_(topology.newStream(spoutNodeName, spout),
+                                  operations);
     }
 
-    public void setPartitionedTridentSpout(final IPartitionedTridentSpout<?> spout) {
-        _streamFactory = new PartitionedTridentSpoutFactory(spout);
+    public StreamWrapper(final IPartitionedTridentSpout<?> spout,
+                         final String spoutNodeName,
+                         final TridentTopology topology,
+                         final List<IStreamOperation> operations) {
+        _stream = decorateStream_(topology.newStream(spoutNodeName, spout),
+                                  operations);
     }
 
-    public void setOpaquePartitionedTridentSpout(final IOpaquePartitionedTridentSpout<?> spout) {
-        _streamFactory = new OpaquePartitionedTridentSpoutFactory(spout);
+    public StreamWrapper(final IOpaquePartitionedTridentSpout<?> spout,
+                         final String spoutNodeName,
+                         final TridentTopology topology,
+                         final List<IStreamOperation> operations) {
+        _stream = decorateStream_(topology.newStream(spoutNodeName, spout),
+                                  operations);
     }
 
     public Stream getStream() {
-        return _stream;
+        return castAs(Stream.class, _stream);
     }
 
-    public void build() {
-        if (_streamFactory == null) {
+    public TridentState getState() {
+        return castAs(TridentState.class, _stream);
+    }
+
+    public GroupedStream getGroupedStream() {
+        return castAs(GroupedStream.class, _stream);
+    }
+
+    protected static <T> T castAs(Class<T> type, Object obj) {
+        return type.isInstance(obj) ? type.cast(obj) : null;
+    }
+
+    protected Stream decorateStream_(final Stream stream,
+            final List<IStreamOperation> operations) {
+        if (stream == null) {
             throw new RuntimeException("Trying to build a Stream without a spout. StreamWrapper needs to be set with a spout.");
         }
 
-        Object streamObj = _streamFactory.getStream();
+        Object streamObj = stream;
 
-        if (_operations != null) {
-            for (IOperation op : _operations) {
+        if (operations != null) {
+            for (IStreamOperation op : operations) {
                 streamObj = op.addStreamProcessor(streamObj);
             }
         }
 
-        _stream = (Stream) streamObj;
-    }
-
-    private interface IStreamFactory {
-        Stream getStream();
-    }
-
-    private class BatchSpoutFactory implements IStreamFactory {
-
-        private IBatchSpout _spout;
-
-        public BatchSpoutFactory(IBatchSpout spout) {
-            this._spout = spout;
-        }
-
-        public Stream getStream() {
-            return _topology.newStream(_spoutNodeName, _spout);
-        }
-    }
-
-    private class TridentSpoutFactory implements IStreamFactory {
-
-        private ITridentSpout<?> _spout;
-
-        public TridentSpoutFactory(ITridentSpout<?> spout) {
-            this._spout = spout;
-        }
-
-        public Stream getStream() {
-            return _topology.newStream(_spoutNodeName, _spout);
-        }
-    }
-
-    private class PartitionedTridentSpoutFactory implements IStreamFactory {
-
-        private IPartitionedTridentSpout<?> _spout;
-
-        public PartitionedTridentSpoutFactory(IPartitionedTridentSpout<?> spout) {
-            this._spout = spout;
-        }
-
-        public Stream getStream() {
-            return _topology.newStream(_spoutNodeName, _spout);
-        }
-    }
-
-    private class OpaquePartitionedTridentSpoutFactory implements
-            IStreamFactory {
-
-        private IOpaquePartitionedTridentSpout<?> _spout;
-
-        public OpaquePartitionedTridentSpoutFactory(IOpaquePartitionedTridentSpout<?> spout) {
-            this._spout = spout;
-        }
-
-        public Stream getStream() {
-            return _topology.newStream(_spoutNodeName, _spout);
-        }
+        return (Stream) streamObj;
     }
 }
-//
-// public class StreamFactory implements FactoryBean<Object> {
-//
-// protected String _spoutNodeName;
-// protected IBatchSpout _spout;
-// protected TridentTopology _topology;
-// protected List<IOperation> _operations;
-//
-// public StreamFactory(final IBatchSpout spout,
-// final TridentTopology topology) {
-// this._spout = spout;
-// this._topology = topology;
-// }
-//
-// public void setSpoutNodeName(final String name) {
-// this._spoutNodeName = name;
-// }
-//
-// public void setSpout(final IBatchSpout spout) {
-// this._spout = spout;
-// }
-//
-// public void setOperations(List<IOperation> operations) {
-// this._operations = operations;
-// }
-//
-// public Object getObject() throws Exception {
-// Object stream = _topology
-// .newStream(_spoutNodeName, _spout);
-//
-// if (_operations != null) {
-// for (IOperation op : _operations) {
-// stream = op.visit(stream);
-// }
-// }
-//
-// return stream;
-// }
-//
-// public Class<?> getObjectType() {
-// return Object.class;
-// }
-//
-// public boolean isSingleton() {
-// return false;
-// }
-//
-// }

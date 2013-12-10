@@ -1,9 +1,9 @@
 package com.kaseya.trident;
 
-import com.kaseya.trident.operations.IOperation;
+import com.kaseya.trident.operations.IStreamOperation;
 
 public class Utils {
-    public static void ValidateOperationType(IOperation operation,
+    public static void ValidateOperationType(IStreamOperation operation,
             Object obj,
             Class<?> expectedType) {
         if (!expectedType.isInstance(obj)) {

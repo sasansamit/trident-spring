@@ -1,5 +1,5 @@
 package com.kaseya.trident.operations;
 
-public interface IOperation {
+public interface IStreamOperation {
     public Object addStreamProcessor(final Object stream);
 }

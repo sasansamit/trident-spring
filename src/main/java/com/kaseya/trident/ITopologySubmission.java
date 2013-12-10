@@ -6,11 +6,6 @@ import backtype.storm.generated.StormTopology;
 public interface ITopologySubmission {
 
     /**
-     * Submit Topology
-     */
-    public void submit();
-
-    /**
      * Getter for Topology Id
      * 
      * @return Topology Id

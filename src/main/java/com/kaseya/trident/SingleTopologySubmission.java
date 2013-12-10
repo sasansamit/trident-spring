@@ -21,15 +21,6 @@ public class SingleTopologySubmission implements ITopologySubmission {
         this._config = config;
     }
 
-    /* (non-Javadoc)
-     * @see com.kaseya.trident.ITopologySubmission#submit()
-     */
-    public void submit() {
-        for (StreamWrapper builder : _streams) {
-            builder.build();
-        }
-    }
-
     // Getters & Setter
     public String getTopologyId() {
         return _topologyId;

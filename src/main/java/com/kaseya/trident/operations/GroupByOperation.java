@@ -7,7 +7,7 @@ import backtype.storm.tuple.Fields;
 
 import com.kaseya.trident.Utils;
 
-public class GroupByOperation implements IOperation {
+public class GroupByOperation implements IStreamOperation {
 
     protected final Fields _groupBy;
 
