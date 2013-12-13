@@ -102,7 +102,7 @@ public class StreamWrapper {
                                   operations);
     }
 
-    public StreamWrapper(final IPartitionedTridentSpout<?> spout,
+    public StreamWrapper(final IPartitionedTridentSpout<?, ?, ?> spout,
                          final String spoutNodeName,
                          final TridentTopology topology,
                          final List<IStreamOperation> operations) {
@@ -110,7 +110,7 @@ public class StreamWrapper {
                                   operations);
     }
 
-    public StreamWrapper(final IOpaquePartitionedTridentSpout<?> spout,
+    public StreamWrapper(final IOpaquePartitionedTridentSpout<?, ?, ?> spout,
                          final String spoutNodeName,
                          final TridentTopology topology,
                          final List<IStreamOperation> operations) {

@@ -25,7 +25,7 @@ public class StateQueryOperation implements IStreamOperation {
 
     public Object addStreamProcessor(Object stream) {
         Utils.ValidateOperationType(this, stream, Stream.class);
-        
+
         Stream castStream = (Stream) stream;
         return castStream.stateQuery(_state, _queryFunction, _outputTuples);
     }

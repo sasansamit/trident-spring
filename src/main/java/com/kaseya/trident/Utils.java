@@ -3,6 +3,12 @@ package com.kaseya.trident;
 import com.kaseya.trident.operations.IStreamOperation;
 
 public class Utils {
+
+    public static final String kCPU = "cpu";
+    public static final String kMemory = "memory";
+    public static final String kDeviceId = "deviceid";
+    public static final String kTimeStamp = "timestamp";
+
     public static void ValidateOperationType(IStreamOperation operation,
             Object obj,
             Class<?> expectedType) {

@@ -3,7 +3,7 @@ package com.kaseya.trident;
 import static com.kaseya.trident.Utils.ValidateArgs;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import backtype.storm.LocalCluster;
 import backtype.storm.utils.Utils;
@@ -17,10 +17,11 @@ public final class TopologySubmitter {
 
         ValidateArgs(args);
 
-        ApplicationContext appContext = new ClassPathXmlApplicationContext(args[0]);
+        ApplicationContext appContext = new FileSystemXmlApplicationContext(args[0]);
+//        ApplicationContext appContext = new ClassPathXmlApplicationContext(args[0]);
 
         ITopologySubmission submission = (ITopologySubmission) appContext
-                .getBean("wordCountTopologySubmission");
+                .getBean("topologySubmission");
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology(submission.getTopologyId(),
