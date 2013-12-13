@@ -7,8 +7,6 @@
 
 *.class
 
-input.xml
-
 target/classes/META-INF/MANIFEST.MF
 
 target/classes/META-INF/maven/com.kaseya/trident-spring/pom.properties
