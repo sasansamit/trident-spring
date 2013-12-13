@@ -28,8 +28,8 @@ public final class TopologySubmitter {
                                submission.getConfig(),
                                submission.getTopology());
 
-        Utils.sleep(10000);
-        cluster.killTopology(submission.getTopologyId());
-        cluster.shutdown();
+//        Utils.sleep(10000);
+//        cluster.killTopology(submission.getTopologyId());
+//        cluster.shutdown();
     }
 }

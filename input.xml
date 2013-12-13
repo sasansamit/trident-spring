@@ -1,55 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd 
 http://www.springframework.org/schema/context
 http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-    <context:annotation-config />
+	<context:annotation-config />
 
-    <!-- Spout -->
-    <bean id="zkHost" class="storm.kafka.ZkHosts" c:brokerZkStr="169.254.109.218:2181" />
-<!--     <bean id="kafkaConfig" class="com.kaseya.kafka.TridentKafkaConfigBeanFactory"
-        c:hosts-ref="zkHost" c:topic="memory" /> -->
-    <bean id="kafkaConfig1" class="com.kaseya.kafka.TridentKafkaConfigBeanFactory"
-        c:hosts-ref="zkHost" c:topic="memory" />
-    <bean id="spout1" class="storm.kafka.trident.TransactionalTridentKafkaSpout"
-        c:config-ref="kafkaConfig1" />
+	<!-- Spout -->
+	<bean id="zkHost" class="storm.kafka.ZkHosts" c:brokerZkStr="localhost:2181" />
+	<!-- <bean id="kafkaConfig" class="com.kaseya.kafka.TridentKafkaConfigBeanFactory" 
+		c:hosts-ref="zkHost" c:topic="memory" /> -->
+	<bean id="kafkaConfig1" class="com.kaseya.kafka.TridentKafkaConfigBeanFactory"
+		c:hosts-ref="zkHost" c:topic="memory" />
+	<bean id="spout1" class="storm.kafka.trident.TransactionalTridentKafkaSpout"
+		c:config-ref="kafkaConfig1" />
 
-    <!-- Topology Submission -->
-    <bean id="topologySubmission" class="com.kaseya.trident.SingleTopologySubmission"
-        c:topologyId="topology" c:topology-ref="topology" c:config-ref="config"
-        p:streams-ref="streams" />
+	<!-- Topology Submission -->
+	<bean id="topologySubmission" class="com.kaseya.trident.SingleTopologySubmission"
+		c:topologyId="topology" c:topology-ref="topology" c:config-ref="config"
+		p:streams-ref="streams" />
 
-    <util:list id="streams">
-        <ref bean="stream1" />
-    </util:list>
+	<util:list id="streams">
+		<ref bean="stream1" />
+	</util:list>
 
-    <!-- Stream wrapper objects -->
-    <bean id="stream1" class="com.kaseya.trident.StreamWrapper"
-        c:spoutNodeName="spout1" c:topology-ref="topology"
-        c:operations-ref="operations1" c:spout-ref="spout1" />
+	<!-- Stream wrapper objects -->
+	<bean id="stream1" class="com.kaseya.trident.StreamWrapper"
+		c:spoutNodeName="spout1" c:topology-ref="topology" c:operations-ref="operations1"
+		c:spout-ref="spout1" />
 
-    <util:list id="operations1">
-        <bean class="com.kaseya.trident.operations.EachOperation"
-            c:inputTuples="str" c:function-ref="jsonAdapter"
-            c:outputTuples-ref="jsonOutputTuples" />
-    </util:list>
+	<util:list id="operations1">
+		<bean class="com.kaseya.trident.operations.EachOperation"
+			c:inputTuples="str" c:function-ref="jsonAdapter" c:outputTuples-ref="jsonOutputTuples" />
+		<bean class="com.kaseya.trident.operations.PartitionPersistOperation"
+			c:stateFactory-ref="memStateFactory" c:inputFields-ref="jsonOutputTuples"
+			c:updater-ref="dslInvoker" />
+	</util:list>
 
-    <!-- Object Store -->
-    <util:list id="jsonOutputTuples">
-        <value>timestamp</value>
-        <value>deviceid</value>
-        <value>memory</value>
-    </util:list>
-    <bean id="jsonAdapter" class="com.kaseya.trident.functions.JSONAdapterFunction" />
+	<!-- Object Store -->
+	<bean id="memStateFactory" class="com.kaseya.trident.dsl.MemoryStateObject.Factory" />
+	<util:list id="jsonOutputTuples">
+		<value>timestamp</value>
+		<value>deviceid</value>
+		<value>memory</value>
+	</util:list>
+	<bean id="jsonAdapter" class="com.kaseya.trident.functions.JSONAdapterFunction" />
+	<bean id="dslInvoker" class="com.kaseya.trident.dsl.GroovyDSLInvoker"
+		c:filePath="/home/vagrant/shared/trident-spring/anomalydetection.groovy" />
 
-    <!-- Trident Config -->
-    <bean id="config" class="backtype.storm.Config" p:debug="true" />
+	<!-- Trident Config -->
+	<bean id="config" class="backtype.storm.Config" p:debug="false" />
 
-    <!-- Topology -->
-    <bean id="topology" class="storm.trident.TridentTopology" />
+	<!-- Topology -->
+	<bean id="topology" class="storm.trident.TridentTopology" />
 </beans>

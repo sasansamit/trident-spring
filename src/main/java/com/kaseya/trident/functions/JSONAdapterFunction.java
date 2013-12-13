@@ -23,12 +23,12 @@ public class JSONAdapterFunction extends BaseFunction {
     public void execute(TridentTuple tuple, TridentCollector collector) {
         JSONObject jsonObj = (JSONObject) JSONValue.parse(tuple.getString(0));
 
-        logger.info("Kafka Input: " + tuple);
+        logger.info("Kafka Input: " + tuple.getString(0));
 
         List<Object> fields = new ArrayList<Object>();
         fields.add(jsonObj.get(Utils.kTimeStamp));
         fields.add(jsonObj.get(Utils.kDeviceId));
-        fields.add(jsonObj.get(Utils.kMemory));
+        fields.add(Double.parseDouble(jsonObj.get(Utils.kMemory).toString()));
 
         collector.emit(fields);
     }
