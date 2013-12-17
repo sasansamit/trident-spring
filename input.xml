@@ -56,7 +56,7 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     </util:list>
     <bean id="jsonAdapter" class="com.kaseya.trident.functions.JSONAdapterFunction" />
     <bean id="dslInvoker" class="com.kaseya.trident.dsl.GroovyDSLInvoker"
-        c:filePath="/home/vagrant/shared/trident-spring/anomalydetection.groovy" />
+        c:filePath="./anomalydetection.groovy" />
 
     <!-- Trident Config -->
     <bean id="config" class="backtype.storm.Config" p:debug="false" />
