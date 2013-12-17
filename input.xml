@@ -14,7 +14,7 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     <bean id="zkHost" class="storm.kafka.ZkHosts" c:brokerZkStr="localhost:2181" />
     <!-- <bean id="kafkaConfig" class="com.kaseya.kafka.TridentKafkaConfigBeanFactory" 
         c:hosts-ref="zkHost" c:topic="memory" /> -->
-    <bean id="kafkaConfig1" class="com.kaseya.kafka.TridentKafkaConfigBeanFactory"
+    <bean id="kafkaConfig1" class="com.kaseya.kafka.TridentKafkaConfigFactoryBean"
         c:hosts-ref="zkHost" c:topic="memory" />
     <bean id="spout1" class="storm.kafka.trident.TransactionalTridentKafkaSpout"
         c:config-ref="kafkaConfig1" />
@@ -37,6 +37,8 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
         <bean class="com.kaseya.trident.operations.EachOperation"
             c:inputTuples="str" c:function-ref="jsonAdapter"
             c:outputTuples-ref="jsonOutputTuples" />
+        <bean class="com.kaseya.trident.operations.GroupByOperation"
+            c:groupBy="deviceid" />
         <bean class="com.kaseya.trident.operations.PartitionPersistOperation"
             c:stateFactory-ref="memStateFactory" c:inputFields-ref="jsonOutputTuples"
             c:updater-ref="dslInvoker" />

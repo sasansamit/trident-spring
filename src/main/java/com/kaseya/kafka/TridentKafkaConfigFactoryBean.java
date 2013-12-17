@@ -7,13 +7,13 @@ import storm.kafka.BrokerHosts;
 import storm.kafka.StringScheme;
 import storm.kafka.trident.TridentKafkaConfig;
 
-public class TridentKafkaConfigBeanFactory implements
+public class TridentKafkaConfigFactoryBean implements
         FactoryBean<TridentKafkaConfig> {
 
     private BrokerHosts _hosts;
     private String _topic;
 
-    public TridentKafkaConfigBeanFactory(final BrokerHosts hosts,
+    public TridentKafkaConfigFactoryBean(final BrokerHosts hosts,
                                          final String topic) {
         this._hosts = hosts;
         this._topic = topic;
