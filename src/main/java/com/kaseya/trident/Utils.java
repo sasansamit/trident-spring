@@ -1,5 +1,7 @@
 package com.kaseya.trident;
 
+import java.util.List;
+
 import com.kaseya.trident.operations.IStreamOperation;
 
 public class Utils {
@@ -11,14 +13,24 @@ public class Utils {
 
     public static void ValidateOperationType(IStreamOperation operation,
             Object obj,
-            Class<?> expectedType) {
-        if (!expectedType.isInstance(obj)) {
-            throw new RuntimeException(operation.getClass()
-                                       + " can only be called on a "
-                                       + expectedType
-                                       + ". Current stream is of type ["
-                                       + obj.getClass()
-                                       + "]");
+            Class<?>... expectedTypes) {
+        boolean success = false;
+        for (Class<?> cls : expectedTypes) {
+            if (cls.isInstance(obj)) {
+                success = true;
+                break;
+            }
+        }
+        if (!success) {
+            String msg = operation.getClass()
+                    + " can only be called on a [";
+            for (Class<?> cls : expectedTypes) {
+                msg += "\n - " +cls;
+            }
+            msg += "\n]. Current stream is of type ["
+                    + obj.getClass()
+                    + "]";
+            throw new RuntimeException(msg);
         }
     }
 

@@ -39,9 +39,12 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
             c:outputTuples-ref="jsonOutputTuples" />
         <bean class="com.kaseya.trident.operations.GroupByOperation"
             c:groupBy="deviceid" />
-        <bean class="com.kaseya.trident.operations.PartitionPersistOperation"
-            c:stateFactory-ref="memStateFactory" c:inputFields-ref="jsonOutputTuples"
-            c:updater-ref="dslInvoker" />
+        <bean class="com.kaseya.trident.operations.EachOperation"
+            c:inputTuples-ref="jsonOutputTuples" c:function-ref="dslInvoker"
+            c:outputTuples="" />
+        <!-- <bean class="com.kaseya.trident.operations.PartitionPersistOperation" 
+            c:stateFactory-ref="memStateFactory" c:inputFields-ref="jsonOutputTuples" 
+            c:updater-ref="dslInvoker" /> -->
     </util:list>
 
     <!-- Object Store -->

@@ -3,6 +3,7 @@ package com.kaseya.trident.operations;
 import java.util.List;
 
 import storm.trident.Stream;
+import storm.trident.fluent.GroupedStream;
 import storm.trident.operation.Filter;
 import storm.trident.operation.Function;
 import backtype.storm.tuple.Fields;
@@ -26,9 +27,9 @@ public class EachOperation implements IStreamOperation {
 
     public Object addStreamProcessor(Object stream) {
 
-        Utils.ValidateOperationType(this, stream, Stream.class);
+//        Utils.ValidateOperationType(this, stream, Stream.class, GroupedStream.class);
 
-        return _eachHelper.visit((Stream) stream);
+        return _eachHelper.visit(stream);
     }
 
     private abstract class BaseEachHelper {
@@ -38,7 +39,7 @@ public class EachOperation implements IStreamOperation {
             this._inputTuples = new Fields(inputTuples);
         }
 
-        public abstract Stream visit(Stream stream);
+        public abstract Object visit(Object stream);
     }
 
     private class FunctionEachHelper extends BaseEachHelper {
@@ -54,8 +55,14 @@ public class EachOperation implements IStreamOperation {
         }
 
         @Override
-        public Stream visit(Stream stream) {
-            return stream.each(_inputTuples, _function, _outputTuples);
+        public Object visit(Object stream) {
+            Utils.ValidateOperationType(EachOperation.this, stream, Stream.class, GroupedStream.class);
+            
+            if (Stream.class.isInstance(stream)) {
+                return ((Stream)stream).each(_inputTuples, _function, _outputTuples);
+            }
+
+            return ((GroupedStream)stream).each(_inputTuples, _function, _outputTuples);
         }
     }
 
@@ -70,8 +77,10 @@ public class EachOperation implements IStreamOperation {
         }
 
         @Override
-        public Stream visit(Stream stream) {
-            return stream.each(_inputTuples, _filter);
+        public Object visit(Object stream) {
+            Utils.ValidateOperationType(EachOperation.this, stream, Stream.class);
+            
+            return ((Stream)stream).each(_inputTuples, _filter);
         }
     }
 }

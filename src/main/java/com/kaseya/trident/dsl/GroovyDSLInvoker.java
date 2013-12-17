@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.operation.TridentOperationContext;
 import storm.trident.state.StateUpdater;
@@ -22,7 +23,8 @@ import storm.trident.tuple.TridentTuple;
 import com.kaseya.trident.Utils;
 
 @SuppressWarnings("serial")
-public class GroovyDSLInvoker implements StateUpdater<MemoryStateObject> {
+//public class GroovyDSLInvoker implements StateUpdater<MemoryStateObject> {
+    public class GroovyDSLInvoker extends BaseFunction {
     static protected Logger sLogger = Logger.getLogger(GroovyDSLInvoker.class);
 
     private transient GroovyScriptEngine _scriptEngine;
@@ -118,5 +120,24 @@ public class GroovyDSLInvoker implements StateUpdater<MemoryStateObject> {
         in.defaultReadObject();
 
         init_();
+    }
+
+    @Override
+    public void execute(TridentTuple tuple, TridentCollector collector) {
+        _input.clear();
+        _input.put(Utils.kMemory, tuple.getValueByField(Utils.kMemory));
+        _input.put(Utils.kDeviceId, tuple.getStringByField(Utils.kDeviceId));
+        _input.put(Utils.kTimeStamp,
+                   tuple.getValueByField(Utils.kTimeStamp));
+
+        try {
+            executeScript_();
+        } catch (ResourceException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ScriptException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }
