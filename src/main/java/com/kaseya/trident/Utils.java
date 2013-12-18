@@ -36,13 +36,8 @@ public class Utils {
 
     public static void ValidateArgs(final String[] args) {
 
-        if (args.length < 2) {
-            throw new IllegalArgumentException("Arguments: Needs two arguments - <XmlApplicationContext> <TopologySubmission bean name>");
-        }
-        else if (args[0] == null) {
-            throw new IllegalArgumentException("Argument 1: XmlApplicationContext was not defined");
-        } else if (args[1] == null) {
-            throw new IllegalArgumentException("Argument 2: TopologySubmission bean was not defined");
+        if (args.length < 1) {
+            throw new IllegalArgumentException("Arguments: Needs one argument - <XmlApplicationContext>");
         }
     }
 }
