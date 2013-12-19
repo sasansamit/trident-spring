@@ -23,8 +23,8 @@ import storm.trident.tuple.TridentTuple;
 import com.kaseya.trident.Utils;
 
 @SuppressWarnings("serial")
-//public class GroovyDSLInvoker implements StateUpdater<MemoryStateObject> {
-    public class GroovyDSLInvoker extends BaseFunction {
+// public class GroovyDSLInvoker implements StateUpdater<MemoryStateObject> {
+public class GroovyDSLInvoker extends BaseFunction {
     static protected Logger sLogger = Logger.getLogger(GroovyDSLInvoker.class);
 
     private transient GroovyScriptEngine _scriptEngine;
@@ -35,8 +35,12 @@ import com.kaseya.trident.Utils;
     private transient HashMap<String, Object> _input;
     private transient MemoryStateObject _state;
 
-    public GroovyDSLInvoker(final String filePath) throws IOException {
+    private List<String> _inTuple;
+
+    public GroovyDSLInvoker(final String filePath, final List<String> tuple) throws IOException {
         this._file = new File(filePath);
+        this._inTuple = tuple;
+
         init_();
     }
 
@@ -62,7 +66,8 @@ import com.kaseya.trident.Utils;
         _scriptEngine.run(_file.getAbsolutePath(), _binding);
     }
 
-    public void prepare(@SuppressWarnings("rawtypes") Map conf, TridentOperationContext context) {
+    public void prepare(@SuppressWarnings("rawtypes") Map conf,
+            TridentOperationContext context) {
     }
 
     public void cleanup() {
@@ -73,10 +78,10 @@ import com.kaseya.trident.Utils;
 
         for (TridentTuple tuple : tuples) {
             _input.clear();
-            _input.put(Utils.kMemory, tuple.getValueByField(Utils.kMemory));
-            _input.put(Utils.kDeviceId, tuple.getStringByField(Utils.kDeviceId));
-            _input.put(Utils.kTimeStamp,
-                       tuple.getValueByField(Utils.kTimeStamp));
+
+            for (String element : _inTuple) {
+                _input.put(element, tuple.getValueByField(element));
+            }
 
             try {
                 executeScript_();

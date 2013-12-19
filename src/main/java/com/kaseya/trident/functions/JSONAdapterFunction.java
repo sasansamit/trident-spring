@@ -11,13 +11,16 @@ import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 
-import com.kaseya.trident.Utils;
-
 @SuppressWarnings("serial")
 public class JSONAdapterFunction extends BaseFunction {
 
-    protected static Logger logger = Logger
+    protected static final Logger logger = Logger
             .getLogger(JSONAdapterFunction.class);
+    final private List<String> _tuple;
+    
+    public JSONAdapterFunction(final List<String> tuple) {
+        this._tuple = tuple;
+    }
 
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
@@ -26,9 +29,10 @@ public class JSONAdapterFunction extends BaseFunction {
         logger.info("Kafka Input: " + tuple.getString(0));
 
         List<Object> fields = new ArrayList<Object>();
-        fields.add(jsonObj.get(Utils.kTimeStamp));
-        fields.add(jsonObj.get(Utils.kDeviceId));
-        fields.add(Double.parseDouble(jsonObj.get(Utils.kMemory).toString()));
+        
+        for (String element : _tuple) {
+            fields.add(jsonObj.get(element));
+        }
 
         collector.emit(fields);
     }
